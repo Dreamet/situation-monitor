@@ -65,7 +65,13 @@
             color: var(--accent);
         }
 
-        .refresh-btn {
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .refresh-btn, .settings-btn {
             background: var(--accent);
             color: var(--bg);
             border: none;
@@ -79,13 +85,127 @@
             transition: opacity 0.2s;
         }
 
-        .refresh-btn:hover {
+        .settings-btn {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .refresh-btn:hover, .settings-btn:hover {
             opacity: 0.8;
         }
 
         .refresh-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-modal.open {
+            display: flex;
+        }
+
+        .settings-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .settings-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-section {
+            margin-bottom: 1rem;
+        }
+
+        .settings-section-title {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .panel-toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-toggle-item label {
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 36px;
+            height: 20px;
+            background: var(--surface);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch.on {
+            background: var(--green);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: var(--text);
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .toggle-switch.on::after {
+            transform: translateX(16px);
+        }
+
+        .settings-close {
+            margin-top: 1rem;
+            width: 100%;
+            padding: 0.6rem;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            font-family: inherit;
+            font-size: 0.7rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
         }
 
         .dashboard {
@@ -101,6 +221,12 @@
             display: flex;
             flex-direction: column;
             min-height: 300px;
+            transition: min-height 0.2s, opacity 0.2s;
+        }
+
+        .panel.hidden {
+            min-height: 0;
+            display: none;
         }
 
         .panel.wide {
@@ -113,6 +239,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .panel-header:hover {
+            background: var(--surface);
+        }
+
+        .panel-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-toggle {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            transition: transform 0.2s;
+        }
+
+        .panel.collapsed .panel-toggle {
+            transform: rotate(-90deg);
         }
 
         .panel-title {
@@ -132,6 +280,16 @@
             flex: 1;
             overflow-y: auto;
             max-height: 380px;
+            transition: max-height 0.2s;
+        }
+
+        .panel.collapsed .panel-content {
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .panel.collapsed {
+            min-height: auto;
         }
 
         .item {
@@ -824,12 +982,27 @@
             <h1 class="title">Situation Monitor</h1>
             <span class="status" id="status">Ready</span>
         </div>
-        <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">Refresh</button>
+        <div class="header-right">
+            <button class="settings-btn" onclick="toggleSettings()">Panels</button>
+            <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">Refresh</button>
+        </div>
     </header>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal" onclick="if(event.target === this) toggleSettings()">
+        <div class="settings-content">
+            <div class="settings-title">Panel Settings</div>
+            <div class="settings-section">
+                <div class="settings-section-title">Toggle Panels</div>
+                <div id="panelToggles"></div>
+            </div>
+            <button class="settings-close" onclick="toggleSettings()">Close</button>
+        </div>
+    </div>
 
     <main class="dashboard">
         <!-- Global Intelligence Map -->
-        <section class="panel" style="grid-column: span 4;">
+        <section class="panel" data-panel="map" style="grid-column: span 4;">
             <div class="panel-header">
                 <span class="panel-title">Global Activity Monitor</span>
                 <span class="panel-count" id="mapLegend">
@@ -844,7 +1017,7 @@
         </section>
 
         <!-- Political / World News -->
-        <section class="panel">
+        <section class="panel" data-panel="politics">
             <div class="panel-header">
                 <span class="panel-title">World / Geopolitical</span>
                 <span class="panel-count" id="politicsCount">-</span>
@@ -855,7 +1028,7 @@
         </section>
 
         <!-- Technology News -->
-        <section class="panel">
+        <section class="panel" data-panel="tech">
             <div class="panel-header">
                 <span class="panel-title">Technology / AI</span>
                 <span class="panel-count" id="techCount">-</span>
@@ -866,7 +1039,7 @@
         </section>
 
         <!-- Financial News -->
-        <section class="panel">
+        <section class="panel" data-panel="finance">
             <div class="panel-header">
                 <span class="panel-title">Financial</span>
                 <span class="panel-count" id="financeCount">-</span>
@@ -877,7 +1050,7 @@
         </section>
 
         <!-- Government / Policy -->
-        <section class="panel">
+        <section class="panel" data-panel="gov">
             <div class="panel-header">
                 <span class="panel-title">Government / Policy</span>
                 <span class="panel-count" id="govCount">-</span>
@@ -888,7 +1061,7 @@
         </section>
 
         <!-- Sector Heatmap -->
-        <section class="panel">
+        <section class="panel" data-panel="heatmap">
             <div class="panel-header">
                 <span class="panel-title">Sector Heatmap</span>
             </div>
@@ -898,7 +1071,7 @@
         </section>
 
         <!-- Markets -->
-        <section class="panel wide">
+        <section class="panel wide" data-panel="markets">
             <div class="panel-header">
                 <span class="panel-title">Markets</span>
                 <span class="panel-count" id="marketsCount">-</span>
@@ -909,7 +1082,7 @@
         </section>
 
         <!-- Commodities -->
-        <section class="panel">
+        <section class="panel" data-panel="commodities">
             <div class="panel-header">
                 <span class="panel-title">Commodities / VIX</span>
             </div>
@@ -919,7 +1092,7 @@
         </section>
 
         <!-- Polymarket -->
-        <section class="panel wide">
+        <section class="panel wide" data-panel="polymarket">
             <div class="panel-header">
                 <span class="panel-title">Polymarket Predictions</span>
                 <span class="panel-count" id="polymarketCount">-</span>
@@ -930,7 +1103,7 @@
         </section>
 
         <!-- Congressional Trading -->
-        <section class="panel">
+        <section class="panel" data-panel="congress">
             <div class="panel-header">
                 <span class="panel-title">Congress Trades</span>
                 <span class="panel-count" id="congressCount">-</span>
@@ -941,7 +1114,7 @@
         </section>
 
         <!-- Whale Wallet Watch -->
-        <section class="panel">
+        <section class="panel" data-panel="whales">
             <div class="panel-header">
                 <span class="panel-title">Whale Watch</span>
                 <span class="panel-count" id="whaleCount">-</span>
@@ -952,7 +1125,7 @@
         </section>
 
         <!-- Main Character -->
-        <section class="panel">
+        <section class="panel" data-panel="mainchar">
             <div class="panel-header">
                 <span class="panel-title">Main Character</span>
                 <span class="panel-count">Today</span>
@@ -963,7 +1136,7 @@
         </section>
 
         <!-- Money Printer -->
-        <section class="panel">
+        <section class="panel" data-panel="printer">
             <div class="panel-header">
                 <span class="panel-title">Money Printer</span>
                 <span class="panel-count">Fed Balance Sheet</span>
@@ -974,7 +1147,7 @@
         </section>
 
         <!-- Government Contracts -->
-        <section class="panel wide">
+        <section class="panel wide" data-panel="contracts">
             <div class="panel-header">
                 <span class="panel-title">Gov Contracts</span>
                 <span class="panel-count" id="contractsCount">-</span>
@@ -985,7 +1158,7 @@
         </section>
 
         <!-- AI Arms Race -->
-        <section class="panel wide">
+        <section class="panel wide" data-panel="ai">
             <div class="panel-header">
                 <span class="panel-title">AI Arms Race</span>
                 <span class="panel-count" id="aiCount">-</span>
@@ -998,6 +1171,95 @@
     </main>
 
     <script>
+        // Panel configuration with display names
+        const PANELS = {
+            map: { name: 'Global Map', priority: 1 },
+            politics: { name: 'World / Geopolitical', priority: 1 },
+            tech: { name: 'Technology / AI', priority: 1 },
+            finance: { name: 'Financial', priority: 1 },
+            gov: { name: 'Government / Policy', priority: 2 },
+            heatmap: { name: 'Sector Heatmap', priority: 1 },
+            markets: { name: 'Markets', priority: 1 },
+            commodities: { name: 'Commodities / VIX', priority: 2 },
+            polymarket: { name: 'Polymarket', priority: 2 },
+            congress: { name: 'Congress Trades', priority: 3 },
+            whales: { name: 'Whale Watch', priority: 3 },
+            mainchar: { name: 'Main Character', priority: 2 },
+            printer: { name: 'Money Printer', priority: 2 },
+            contracts: { name: 'Gov Contracts', priority: 3 },
+            ai: { name: 'AI Arms Race', priority: 3 }
+        };
+
+        // Load panel visibility from localStorage
+        function getPanelSettings() {
+            try {
+                const saved = localStorage.getItem('situationMonitorPanels');
+                return saved ? JSON.parse(saved) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        // Save panel visibility to localStorage
+        function savePanelSettings(settings) {
+            try {
+                localStorage.setItem('situationMonitorPanels', JSON.stringify(settings));
+            } catch (e) {}
+        }
+
+        // Check if panel is enabled
+        function isPanelEnabled(panelId) {
+            const settings = getPanelSettings();
+            return settings[panelId] !== false; // Default to enabled
+        }
+
+        // Toggle panel visibility
+        function togglePanel(panelId) {
+            const settings = getPanelSettings();
+            settings[panelId] = !isPanelEnabled(panelId);
+            savePanelSettings(settings);
+            applyPanelSettings();
+            updateSettingsUI();
+        }
+
+        // Apply panel settings to DOM
+        function applyPanelSettings() {
+            document.querySelectorAll('[data-panel]').forEach(panel => {
+                const panelId = panel.dataset.panel;
+                if (isPanelEnabled(panelId)) {
+                    panel.classList.remove('hidden');
+                } else {
+                    panel.classList.add('hidden');
+                }
+            });
+        }
+
+        // Toggle settings modal
+        function toggleSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.toggle('open');
+            if (modal.classList.contains('open')) {
+                updateSettingsUI();
+            }
+        }
+
+        // Update settings UI
+        function updateSettingsUI() {
+            const container = document.getElementById('panelToggles');
+            container.innerHTML = Object.entries(PANELS).map(([id, config]) => {
+                const enabled = isPanelEnabled(id);
+                return `
+                    <div class="panel-toggle-item">
+                        <label onclick="togglePanel('${id}')">${config.name}</label>
+                        <div class="toggle-switch ${enabled ? 'on' : ''}" onclick="togglePanel('${id}')"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize panel settings on load
+        document.addEventListener('DOMContentLoaded', applyPanelSettings);
+
         const CORS_PROXIES = [
             'https://corsproxy.io/?',
             'https://api.allorigins.win/raw?url='
@@ -2080,51 +2342,80 @@
             status.className = loading ? 'status loading' : 'status';
         }
 
-        // Refresh all data
+        // Staged refresh - loads critical data first for faster perceived startup
         async function refreshAll() {
             const btn = document.getElementById('refreshBtn');
             btn.disabled = true;
-            setStatus('Fetching...', true);
+            setStatus('Loading critical...', true);
+
+            let allNews = [];
 
             try {
-                const [politics, tech, finance, gov, markets, sectors, commodities, polymarket, congressTrades, whales, contracts, aiNews, fedBalance] = await Promise.all([
-                    fetchCategory(FEEDS.politics),
-                    fetchCategory(FEEDS.tech),
-                    fetchCategory(FEEDS.finance),
-                    fetchCategory(FEEDS.gov),
-                    fetchMarkets(),
-                    fetchSectors(),
-                    fetchCommodities(),
-                    fetchPolymarket(),
-                    fetchCongressTrades(),
-                    fetchWhaleTransactions(),
-                    fetchGovContracts(),
-                    fetchAINews(),
-                    fetchFedBalance()
+                // STAGE 1: Critical data (news + markets) - loads first
+                const stage1Promise = Promise.all([
+                    isPanelEnabled('politics') ? fetchCategory(FEEDS.politics) : Promise.resolve([]),
+                    isPanelEnabled('tech') ? fetchCategory(FEEDS.tech) : Promise.resolve([]),
+                    isPanelEnabled('finance') ? fetchCategory(FEEDS.finance) : Promise.resolve([]),
+                    isPanelEnabled('markets') ? fetchMarkets() : Promise.resolve([]),
+                    isPanelEnabled('heatmap') ? fetchSectors() : Promise.resolve([])
                 ]);
 
-                renderNews(politics, 'politicsPanel', 'politicsCount');
-                renderNews(tech, 'techPanel', 'techCount');
-                renderNews(finance, 'financePanel', 'financeCount');
-                renderNews(gov, 'govPanel', 'govCount');
-                renderMarkets(markets);
-                renderHeatmap(sectors);
-                renderCommodities(commodities);
-                renderPolymarket(polymarket);
-                renderCongressTrades(congressTrades);
-                renderWhaleWatch(whales);
-                renderGovContracts(contracts);
-                renderAINews(aiNews);
-                renderMoneyPrinter(fedBalance);
+                const [politics, tech, finance, markets, sectors] = await stage1Promise;
 
-                // Analyze all news for global map and main character
-                const allNews = [...politics, ...tech, ...finance, ...gov];
-                const activityData = analyzeHotspotActivity(allNews);
-                renderGlobalMap(activityData);
+                // Render Stage 1 immediately
+                if (isPanelEnabled('politics')) renderNews(politics, 'politicsPanel', 'politicsCount');
+                if (isPanelEnabled('tech')) renderNews(tech, 'techPanel', 'techCount');
+                if (isPanelEnabled('finance')) renderNews(finance, 'financePanel', 'financeCount');
+                if (isPanelEnabled('markets')) renderMarkets(markets);
+                if (isPanelEnabled('heatmap')) renderHeatmap(sectors);
 
-                // Calculate main character from all news
-                const mainCharRankings = calculateMainCharacter(allNews);
-                renderMainCharacter(mainCharRankings);
+                allNews = [...politics, ...tech, ...finance];
+                setStatus('Loading more...', true);
+
+                // STAGE 2: Secondary data (gov, commodities, polymarket, printer, mainchar)
+                const stage2Promise = Promise.all([
+                    isPanelEnabled('gov') ? fetchCategory(FEEDS.gov) : Promise.resolve([]),
+                    isPanelEnabled('commodities') ? fetchCommodities() : Promise.resolve([]),
+                    isPanelEnabled('polymarket') ? fetchPolymarket() : Promise.resolve([]),
+                    isPanelEnabled('printer') ? fetchFedBalance() : Promise.resolve({ value: 0, change: 0, changePercent: 0, percentOfMax: 0 })
+                ]);
+
+                const [gov, commodities, polymarket, fedBalance] = await stage2Promise;
+
+                if (isPanelEnabled('gov')) {
+                    renderNews(gov, 'govPanel', 'govCount');
+                    allNews = [...allNews, ...gov];
+                }
+                if (isPanelEnabled('commodities')) renderCommodities(commodities);
+                if (isPanelEnabled('polymarket')) renderPolymarket(polymarket);
+                if (isPanelEnabled('printer')) renderMoneyPrinter(fedBalance);
+
+                // Render map and main character with available news
+                if (isPanelEnabled('map')) {
+                    const activityData = analyzeHotspotActivity(allNews);
+                    renderGlobalMap(activityData);
+                }
+                if (isPanelEnabled('mainchar')) {
+                    const mainCharRankings = calculateMainCharacter(allNews);
+                    renderMainCharacter(mainCharRankings);
+                }
+
+                setStatus('Loading extras...', true);
+
+                // STAGE 3: Extra data (congress, whales, contracts, AI) - lowest priority
+                const stage3Promise = Promise.all([
+                    isPanelEnabled('congress') ? fetchCongressTrades() : Promise.resolve([]),
+                    isPanelEnabled('whales') ? fetchWhaleTransactions() : Promise.resolve([]),
+                    isPanelEnabled('contracts') ? fetchGovContracts() : Promise.resolve([]),
+                    isPanelEnabled('ai') ? fetchAINews() : Promise.resolve([])
+                ]);
+
+                const [congressTrades, whales, contracts, aiNews] = await stage3Promise;
+
+                if (isPanelEnabled('congress')) renderCongressTrades(congressTrades);
+                if (isPanelEnabled('whales')) renderWhaleWatch(whales);
+                if (isPanelEnabled('contracts')) renderGovContracts(contracts);
+                if (isPanelEnabled('ai')) renderAINews(aiNews);
 
                 const now = new Date();
                 setStatus(`Updated ${now.toLocaleTimeString()}`);
