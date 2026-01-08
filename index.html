@@ -748,6 +748,299 @@
             opacity: 0.7;
         }
 
+        /* Map View Toggle (Global/US) */
+        .map-view-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 0;
+            z-index: 50;
+            border: 1px solid #0f6040;
+            overflow: hidden;
+        }
+
+        .map-view-btn {
+            padding: 6px 12px;
+            background: rgba(0, 30, 20, 0.9);
+            border: none;
+            color: #0f6040;
+            font-size: 0.55rem;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'SF Mono', monospace;
+        }
+
+        .map-view-btn:first-child {
+            border-right: 1px solid #0f6040;
+        }
+
+        .map-view-btn:hover {
+            background: rgba(0, 60, 40, 0.9);
+            color: #00ff88;
+        }
+
+        .map-view-btn.active {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        /* US City Markers */
+        .us-city {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            z-index: 25;
+            cursor: pointer;
+        }
+
+        .us-city-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00aaff;
+            border: 1px solid #00ddff;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 6px rgba(0, 170, 255, 0.4);
+        }
+
+        .us-city.capital .us-city-dot {
+            width: 10px;
+            height: 10px;
+            background: #ffcc00;
+            border-color: #ffee66;
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+        }
+
+        .us-city.major .us-city-dot {
+            width: 9px;
+            height: 9px;
+            background: #00ff88;
+            border-color: #66ffaa;
+            box-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
+        }
+
+        .us-city-label {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.5rem;
+            color: #00aaff;
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        .us-city.capital .us-city-label {
+            color: #ffcc00;
+        }
+
+        .us-city.major .us-city-label {
+            color: #00ff88;
+        }
+
+        .us-city:hover .us-city-label {
+            opacity: 1;
+        }
+
+        .us-city:hover .us-city-dot {
+            transform: scale(1.5);
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .us-city::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .us-city:hover::before {
+            border-color: currentColor;
+            opacity: 0.4;
+            animation: city-ping 1.5s ease-out infinite;
+        }
+
+        @keyframes city-ping {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+
+        .us-city-info {
+            font-size: 0.4rem;
+            color: rgba(0, 170, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* US City activity indicators */
+        .us-city.high-activity .us-city-dot {
+            animation: city-pulse 1.5s ease-in-out infinite;
+        }
+
+        .us-city.high-activity::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 100, 100, 0.3) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: activity-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes city-pulse {
+            0%, 100% { box-shadow: 0 0 6px currentColor; }
+            50% { box-shadow: 0 0 15px currentColor; }
+        }
+
+        @keyframes activity-glow {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+        }
+
+        /* US City Popup */
+        .us-city-popup {
+            display: none;
+            position: absolute;
+            z-index: 100;
+            background: rgba(5, 15, 25, 0.98);
+            border: 1px solid #0066aa;
+            min-width: 300px;
+            max-width: 380px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 100, 200, 0.15);
+            pointer-events: auto;
+        }
+
+        .us-city-popup.visible {
+            display: block;
+        }
+
+        .us-city-popup-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0, 100, 170, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 100, 170, 0.1);
+        }
+
+        .us-city-popup-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #00aaff;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .us-city-popup-state {
+            font-size: 0.55rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(0, 170, 255, 0.2);
+            color: #00ccff;
+            border-radius: 2px;
+        }
+
+        .us-city-popup-meta {
+            padding: 0.6rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            border-bottom: 1px solid rgba(0, 100, 170, 0.2);
+            font-size: 0.55rem;
+        }
+
+        .us-city-popup-meta-label {
+            color: #336688;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .us-city-popup-meta-value {
+            color: #66aacc;
+        }
+
+        .us-city-popup-desc {
+            padding: 0.6rem 1rem;
+            font-size: 0.6rem;
+            color: #99bbcc;
+            line-height: 1.5;
+            border-bottom: 1px solid rgba(0, 100, 170, 0.2);
+        }
+
+        .us-city-popup-headlines-title {
+            font-size: 0.5rem;
+            color: #336688;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.5rem 1rem 0.3rem;
+        }
+
+        .us-city-popup-headlines {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .us-city-popup-headline {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid rgba(0, 100, 170, 0.15);
+            font-size: 0.6rem;
+            color: #99bbcc;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .us-city-popup-headline:hover {
+            background: rgba(0, 100, 170, 0.15);
+        }
+
+        .us-city-popup-headline a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .us-city-popup-headline a:hover {
+            color: #00ccff;
+        }
+
+        .us-city-popup-headline-source {
+            font-size: 0.45rem;
+            color: #336688;
+            text-transform: uppercase;
+            margin-bottom: 0.15rem;
+        }
+
+        .us-city-popup-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: #336688;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .us-city-popup-close:hover {
+            color: #00aaff;
+        }
+
         .map-overlays {
             position: absolute;
             top: 0;
@@ -4203,6 +4496,18 @@
             applyMapTransform();
         }
 
+        // Switch between global and US map views
+        function setMapView(mode) {
+            if (mapViewMode === mode) return;
+            mapViewMode = mode;
+            mapZoom = 1;
+            mapPan = { x: 0, y: 0 };
+            // Re-render map with new view
+            if (window.cachedAllNews) {
+                renderGlobalMap({}, [], window.cachedAllNews);
+            }
+        }
+
         function applyMapTransform() {
             const wrapper = document.getElementById('mapZoomWrapper');
             const levelDisplay = document.getElementById('mapZoomLevel');
@@ -4503,6 +4808,135 @@
             { symbol: 'SI=F', name: 'Silver', display: 'SILVER' },
             { symbol: 'HG=F', name: 'Copper', display: 'COPPER' }
         ];
+
+        // US Major Cities for domestic view
+        const US_CITIES = [
+            // Capital
+            {
+                id: 'dc', name: 'Washington D.C.', state: 'DC', lat: 38.9072, lon: -77.0369,
+                type: 'capital', population: '700K',
+                keywords: ['washington', 'capitol', 'congress', 'white house', 'pentagon', 'dc', 'biden', 'trump'],
+                description: 'Federal government center. White House, Capitol Hill, Pentagon, and major federal agencies.',
+                sectors: ['Government', 'Defense', 'Policy']
+            },
+            // Major metros
+            {
+                id: 'nyc', name: 'New York City', state: 'NY', lat: 40.7128, lon: -74.0060,
+                type: 'major', population: '8.3M',
+                keywords: ['new york', 'nyc', 'manhattan', 'wall street', 'broadway', 'brooklyn'],
+                description: 'Financial capital. Wall Street, major media headquarters, UN headquarters.',
+                sectors: ['Finance', 'Media', 'Tech']
+            },
+            {
+                id: 'la', name: 'Los Angeles', state: 'CA', lat: 34.0522, lon: -118.2437,
+                type: 'major', population: '3.9M',
+                keywords: ['los angeles', 'la', 'hollywood', 'california', 'socal'],
+                description: 'Entertainment industry hub. Major port, aerospace, and tech presence.',
+                sectors: ['Entertainment', 'Tech', 'Aerospace']
+            },
+            {
+                id: 'chicago', name: 'Chicago', state: 'IL', lat: 41.8781, lon: -87.6298,
+                type: 'major', population: '2.7M',
+                keywords: ['chicago', 'illinois', 'midwest'],
+                description: 'Midwest economic hub. Commodities trading, transportation logistics.',
+                sectors: ['Finance', 'Logistics', 'Manufacturing']
+            },
+            {
+                id: 'houston', name: 'Houston', state: 'TX', lat: 29.7604, lon: -95.3698,
+                type: 'major', population: '2.3M',
+                keywords: ['houston', 'texas', 'energy', 'oil', 'nasa'],
+                description: 'Energy capital. Oil & gas headquarters, NASA Johnson Space Center.',
+                sectors: ['Energy', 'Aerospace', 'Healthcare']
+            },
+            {
+                id: 'sf', name: 'San Francisco', state: 'CA', lat: 37.7749, lon: -122.4194,
+                type: 'major', population: '870K',
+                keywords: ['san francisco', 'sf', 'bay area', 'silicon valley', 'tech'],
+                description: 'Tech industry epicenter. Venture capital, startups, major tech HQs.',
+                sectors: ['Tech', 'Finance', 'Biotech']
+            },
+            {
+                id: 'seattle', name: 'Seattle', state: 'WA', lat: 47.6062, lon: -122.3321,
+                type: 'major', population: '750K',
+                keywords: ['seattle', 'washington', 'amazon', 'microsoft', 'boeing'],
+                description: 'Pacific Northwest tech hub. Amazon, Microsoft, Boeing headquarters.',
+                sectors: ['Tech', 'Aerospace', 'E-commerce']
+            },
+            {
+                id: 'miami', name: 'Miami', state: 'FL', lat: 25.7617, lon: -80.1918,
+                type: 'major', population: '450K',
+                keywords: ['miami', 'florida', 'latin america', 'caribbean'],
+                description: 'Gateway to Latin America. Finance, real estate, tourism hub.',
+                sectors: ['Finance', 'Real Estate', 'Tourism']
+            },
+            {
+                id: 'atlanta', name: 'Atlanta', state: 'GA', lat: 33.7490, lon: -84.3880,
+                type: 'major', population: '500K',
+                keywords: ['atlanta', 'georgia', 'cdc', 'delta'],
+                description: 'Southeast economic center. CDC headquarters, major logistics hub.',
+                sectors: ['Logistics', 'Healthcare', 'Media']
+            },
+            {
+                id: 'boston', name: 'Boston', state: 'MA', lat: 42.3601, lon: -71.0589,
+                type: 'major', population: '680K',
+                keywords: ['boston', 'massachusetts', 'harvard', 'mit', 'biotech'],
+                description: 'Education and biotech hub. Harvard, MIT, major hospitals.',
+                sectors: ['Education', 'Biotech', 'Finance']
+            },
+            {
+                id: 'denver', name: 'Denver', state: 'CO', lat: 39.7392, lon: -104.9903,
+                type: 'regional', population: '720K',
+                keywords: ['denver', 'colorado', 'aerospace'],
+                description: 'Mountain West hub. Aerospace, tech growth, federal facilities.',
+                sectors: ['Aerospace', 'Tech', 'Energy']
+            },
+            {
+                id: 'phoenix', name: 'Phoenix', state: 'AZ', lat: 33.4484, lon: -112.0740,
+                type: 'regional', population: '1.6M',
+                keywords: ['phoenix', 'arizona', 'semiconductor', 'tsmc'],
+                description: 'Fast-growing Sun Belt metro. Semiconductor manufacturing expansion.',
+                sectors: ['Manufacturing', 'Tech', 'Real Estate']
+            },
+            {
+                id: 'austin', name: 'Austin', state: 'TX', lat: 30.2672, lon: -97.7431,
+                type: 'regional', population: '1M',
+                keywords: ['austin', 'texas', 'tesla', 'tech'],
+                description: 'Texas tech hub. Tesla, Samsung, major tech company expansions.',
+                sectors: ['Tech', 'Manufacturing', 'Entertainment']
+            },
+            {
+                id: 'detroit', name: 'Detroit', state: 'MI', lat: 42.3314, lon: -83.0458,
+                type: 'regional', population: '640K',
+                keywords: ['detroit', 'michigan', 'auto', 'ev', 'ford', 'gm'],
+                description: 'Auto industry center. EV transition, manufacturing renaissance.',
+                sectors: ['Auto', 'Manufacturing', 'Tech']
+            },
+            {
+                id: 'vegas', name: 'Las Vegas', state: 'NV', lat: 36.1699, lon: -115.1398,
+                type: 'regional', population: '650K',
+                keywords: ['las vegas', 'vegas', 'nevada', 'gaming'],
+                description: 'Entertainment and convention hub. Growing tech presence.',
+                sectors: ['Tourism', 'Entertainment', 'Tech']
+            },
+            // Strategic locations
+            {
+                id: 'norfolk', name: 'Norfolk', state: 'VA', lat: 36.8508, lon: -76.2859,
+                type: 'military', population: '245K',
+                keywords: ['norfolk', 'navy', 'naval', 'fleet'],
+                description: 'Largest naval base in world. Atlantic Fleet headquarters.',
+                sectors: ['Military', 'Defense', 'Shipbuilding']
+            },
+            {
+                id: 'sandiego', name: 'San Diego', state: 'CA', lat: 32.7157, lon: -117.1611,
+                type: 'military', population: '1.4M',
+                keywords: ['san diego', 'navy', 'pacific fleet', 'border'],
+                description: 'Major military hub. Pacific Fleet, border region.',
+                sectors: ['Military', 'Biotech', 'Tourism']
+            }
+        ];
+
+        // Current map view mode
+        let mapViewMode = 'global'; // 'global' or 'us'
 
         // Fetch with proxy
         async function fetchWithProxy(url) {
@@ -5189,11 +5623,19 @@
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
 
             // Set up the container
+            const isUSView = mapViewMode === 'us';
+            const mapTitle = isUSView ? 'US DOMESTIC MONITOR' : 'GLOBAL ACTIVITY MONITOR';
+            const mapLegend = isUSView ? '★ CAPITAL | ● MAJOR | ○ REGIONAL' : '⚓ SHIP | ☢ NUKES | ▪ BASES | ═ CABLES';
+
             panel.innerHTML = `
                 <div class="world-map" id="worldMapContainer">
                     <div class="map-zoom-wrapper" id="mapZoomWrapper">
                         <svg id="worldMapSVG"></svg>
                         <div class="map-overlays" id="mapOverlays"></div>
+                    </div>
+                    <div class="map-view-toggle">
+                        <button class="map-view-btn ${!isUSView ? 'active' : ''}" onclick="setMapView('global')">GLOBAL</button>
+                        <button class="map-view-btn ${isUSView ? 'active' : ''}" onclick="setMapView('us')">US</button>
                     </div>
                     <div class="map-zoom-controls">
                         <button class="map-zoom-btn" onclick="mapZoomIn()" title="Zoom In">+</button>
@@ -5203,9 +5645,10 @@
                     </div>
                     <div class="map-pan-hint" id="mapPanHint">DRAG TO PAN</div>
                     <div class="conflict-popup" id="conflictPopup"></div>
-                    <div class="map-corner-label tl">GLOBAL ACTIVITY MONITOR</div>
+                    <div class="us-city-popup" id="usCityPopup"></div>
+                    <div class="map-corner-label tl">${mapTitle}</div>
                     <div class="map-corner-label tr">CLASSIFICATION: OPEN SOURCE</div>
-                    <div class="map-corner-label bl">⚓ SHIP | ☢ NUKES | ▪ BASES | ═ CABLES</div>
+                    <div class="map-corner-label bl">${mapLegend}</div>
                     <div class="map-corner-label br">${timestamp}</div>
                 </div>
             `;
@@ -5220,12 +5663,20 @@
                .attr('viewBox', `0 0 ${width} ${height}`)
                .attr('preserveAspectRatio', 'none');
 
-            // Create projection that fills the entire container
-            // Scale to fit width, center vertically
-            const projection = d3.geoEquirectangular()
-                .scale(width / (2 * Math.PI))
-                .center([0, 0])
-                .translate([width / 2, height / 2]);
+            // Create projection based on view mode
+            let projection;
+            if (isUSView) {
+                // Albers USA projection centered on continental US
+                projection = d3.geoAlbersUsa()
+                    .scale(width * 1.3)
+                    .translate([width / 2, height / 2]);
+            } else {
+                // Global equirectangular projection
+                projection = d3.geoEquirectangular()
+                    .scale(width / (2 * Math.PI))
+                    .center([0, 0])
+                    .translate([width / 2, height / 2]);
+            }
 
             const path = d3.geoPath().projection(projection);
 
@@ -5614,17 +6065,69 @@
             overlaysHTML += `<div class="cyber-popup" id="cyberPopup"></div>`;
             overlaysHTML += `<div class="custom-hotspot-popup" id="customHotspotPopup"></div>`;
 
-            // Layer toggle buttons
-            overlaysHTML += `
-                <div class="map-layer-toggle">
-                    <button class="layer-btn ${mapLayers.conflicts ? 'active' : ''}" onclick="toggleLayer('conflicts')">Conflicts</button>
-                    <button class="layer-btn ${mapLayers.bases ? 'active' : ''}" onclick="toggleLayer('bases')">Bases</button>
-                    <button class="layer-btn ${mapLayers.nuclear ? 'active' : ''}" onclick="toggleLayer('nuclear')">Nuclear</button>
-                    <button class="layer-btn ${mapLayers.cables ? 'active' : ''}" onclick="toggleLayer('cables')">Cables</button>
-                    <button class="layer-btn ${mapLayers.sanctions ? 'active' : ''}" onclick="toggleLayer('sanctions')">Sanctions</button>
-                    <button class="layer-btn ${mapLayers.density ? 'active' : ''}" onclick="toggleLayer('density')">Density</button>
-                </div>
-            `;
+            // US Cities (only in US view mode)
+            if (isUSView) {
+                US_CITIES.forEach(city => {
+                    const projected = projection([city.lon, city.lat]);
+                    if (!projected) return; // Skip if outside projection bounds
+
+                    const posX = (projected[0] / width) * 100;
+                    const posY = (projected[1] / height) * 100;
+
+                    // Check for news activity
+                    let activityLevel = '';
+                    let matchCount = 0;
+                    if (allNews && allNews.length > 0) {
+                        const matches = allNews.filter(item => {
+                            const title = (item.title || '').toLowerCase();
+                            return city.keywords.some(kw => title.includes(kw.toLowerCase()));
+                        });
+                        matchCount = matches.length;
+                        if (matchCount >= 5) activityLevel = 'high-activity';
+                    }
+
+                    // Store city data for popup
+                    const cityData = encodeURIComponent(JSON.stringify({
+                        ...city,
+                        matchCount,
+                        headlines: allNews ? allNews.filter(item => {
+                            const title = (item.title || '').toLowerCase();
+                            return city.keywords.some(kw => title.includes(kw.toLowerCase()));
+                        }).slice(0, 8) : []
+                    }));
+
+                    const typeClass = city.type === 'capital' ? 'capital' :
+                                      city.type === 'major' ? 'major' : '';
+
+                    overlaysHTML += `
+                        <div class="us-city ${typeClass} ${activityLevel}"
+                             style="left: ${posX}%; top: ${posY}%; color: ${city.type === 'capital' ? '#ffcc00' : city.type === 'major' ? '#00ff88' : '#00aaff'};"
+                             data-city-id="${city.id}"
+                             data-city-info="${cityData}"
+                             onclick="showUSCityPopup(event, '${city.id}')">
+                            <div class="us-city-dot"></div>
+                            <div class="us-city-label">
+                                ${city.name}
+                                ${matchCount > 0 ? `<span class="us-city-count">(${matchCount})</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Layer toggle buttons (only for global view)
+            if (!isUSView) {
+                overlaysHTML += `
+                    <div class="map-layer-toggle">
+                        <button class="layer-btn ${mapLayers.conflicts ? 'active' : ''}" onclick="toggleLayer('conflicts')">Conflicts</button>
+                        <button class="layer-btn ${mapLayers.bases ? 'active' : ''}" onclick="toggleLayer('bases')">Bases</button>
+                        <button class="layer-btn ${mapLayers.nuclear ? 'active' : ''}" onclick="toggleLayer('nuclear')">Nuclear</button>
+                        <button class="layer-btn ${mapLayers.cables ? 'active' : ''}" onclick="toggleLayer('cables')">Cables</button>
+                        <button class="layer-btn ${mapLayers.sanctions ? 'active' : ''}" onclick="toggleLayer('sanctions')">Sanctions</button>
+                        <button class="layer-btn ${mapLayers.density ? 'active' : ''}" onclick="toggleLayer('density')">Density</button>
+                    </div>
+                `;
+            }
 
             // Flashback slider
             overlaysHTML += `
@@ -5661,6 +6164,9 @@
                 if (!e.target.closest('.conflict-zone-label') && !e.target.closest('.conflict-popup')) {
                     hideConflictPopup();
                 }
+                if (!e.target.closest('.us-city') && !e.target.closest('.us-city-popup')) {
+                    hideUSCityPopup();
+                }
             });
         }
 
@@ -5676,6 +6182,7 @@
             hideQuakePopup();
             hideCyberPopup();
             hideCustomHotspotPopup();
+            hideUSCityPopup();
 
             const activityData = JSON.parse(decodeURIComponent(hotspotEl.dataset.hotspotActivity));
             const popup = document.getElementById('hotspotPopup');
@@ -5782,6 +6289,7 @@
             hideQuakePopup();
             hideCyberPopup();
             hideCustomHotspotPopup();
+            hideUSCityPopup();
 
             const conflictData = JSON.parse(decodeURIComponent(conflictEl.dataset.conflictInfo));
             const popup = document.getElementById('conflictPopup');
@@ -5882,6 +6390,108 @@
             }
         }
 
+        // Show US city popup
+        function showUSCityPopup(event, cityId) {
+            event.stopPropagation();
+
+            const cityEl = document.querySelector(`[data-city-id="${cityId}"]`);
+            if (!cityEl) return;
+
+            // Hide other popups
+            hideHotspotPopup();
+            hideConflictPopup();
+            hideChokepointPopup();
+            hideQuakePopup();
+            hideCyberPopup();
+            hideCustomHotspotPopup();
+
+            const cityData = JSON.parse(decodeURIComponent(cityEl.dataset.cityInfo));
+            const popup = document.getElementById('usCityPopup');
+
+            // Build headlines HTML
+            let headlinesHTML = '';
+            if (cityData.headlines && cityData.headlines.length > 0) {
+                headlinesHTML = cityData.headlines.map(h => `
+                    <div class="us-city-popup-headline">
+                        <div class="us-city-popup-headline-source">${escapeHtml(h.source || 'News')}</div>
+                        <a href="${h.link || '#'}" target="_blank">${escapeHtml(h.title)}</a>
+                    </div>
+                `).join('');
+            } else {
+                headlinesHTML = '<div style="padding: 1rem; color: #336688; font-size: 0.6rem; text-align: center;">No recent headlines for this city</div>';
+            }
+
+            // Build sectors HTML
+            const sectorsHTML = cityData.sectors ? cityData.sectors.map(s =>
+                `<span style="display: inline-block; font-size: 0.5rem; padding: 0.1rem 0.3rem; margin: 0.1rem; background: rgba(0, 170, 255, 0.1); border: 1px solid rgba(0, 170, 255, 0.2); color: #66aacc;">${escapeHtml(s)}</span>`
+            ).join('') : '';
+
+            popup.innerHTML = `
+                <button class="us-city-popup-close" onclick="hideUSCityPopup()">&times;</button>
+                <div class="us-city-popup-header">
+                    <span class="us-city-popup-title">${escapeHtml(cityData.name)}</span>
+                    <span class="us-city-popup-state">${escapeHtml(cityData.state)}</span>
+                </div>
+                <div class="us-city-popup-meta">
+                    <div>
+                        <span class="us-city-popup-meta-label">Population</span>
+                        <span class="us-city-popup-meta-value">${escapeHtml(cityData.population)}</span>
+                    </div>
+                    <div>
+                        <span class="us-city-popup-meta-label">News Matches</span>
+                        <span class="us-city-popup-meta-value">${cityData.matchCount || 0}</span>
+                    </div>
+                    <div>
+                        <span class="us-city-popup-meta-label">Coordinates</span>
+                        <span class="us-city-popup-meta-value">${cityData.lat.toFixed(2)}°N, ${Math.abs(cityData.lon).toFixed(2)}°W</span>
+                    </div>
+                    <div>
+                        <span class="us-city-popup-meta-label">Type</span>
+                        <span class="us-city-popup-meta-value">${cityData.type === 'capital' ? 'Capital' : cityData.type === 'major' ? 'Major Metro' : cityData.type === 'military' ? 'Military' : 'Regional'}</span>
+                    </div>
+                </div>
+                <div class="us-city-popup-desc">${escapeHtml(cityData.description)}</div>
+                ${sectorsHTML ? `<div style="padding: 0.5rem 1rem; border-bottom: 1px solid rgba(0, 100, 170, 0.2);"><div style="font-size: 0.45rem; color: #336688; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem;">Key Sectors</div>${sectorsHTML}</div>` : ''}
+                <div class="us-city-popup-headlines-title">Related Headlines</div>
+                <div class="us-city-popup-headlines">
+                    ${headlinesHTML}
+                </div>
+            `;
+
+            popup.classList.add('visible');
+
+            // Position popup
+            const cityRect = cityEl.getBoundingClientRect();
+            const mapContainer = document.getElementById('worldMapContainer');
+            const mapRect = mapContainer.getBoundingClientRect();
+
+            let left = cityRect.left - mapRect.left + 20;
+            let top = cityRect.top - mapRect.top - 10;
+
+            const popupWidth = 360;
+            const popupHeight = 420;
+
+            if (left + popupWidth > mapRect.width) {
+                left = cityRect.left - mapRect.left - popupWidth - 20;
+            }
+            if (top + popupHeight > mapRect.height) {
+                top = mapRect.height - popupHeight - 10;
+            }
+            if (top < 10) top = 10;
+            if (left < 10) left = 10;
+
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+        }
+
+        // Hide US city popup
+        function hideUSCityPopup() {
+            const popup = document.getElementById('usCityPopup');
+            if (popup) {
+                popup.classList.remove('visible');
+            }
+        }
+
         // Escape HTML for popup content
         function escapeHtml(text) {
             if (!text) return '';
@@ -5902,6 +6512,8 @@
             hideQuakePopup();
             hideCyberPopup();
             hideCustomHotspotPopup();
+            hideUSCityPopup();
+            hideConflictPopup();
 
             const cpData = JSON.parse(decodeURIComponent(cpEl.dataset.chokepointInfo));
             const popup = document.getElementById('chokepointPopup');
@@ -5990,6 +6602,8 @@
             hideChokepointPopup();
             hideCyberPopup();
             hideCustomHotspotPopup();
+            hideUSCityPopup();
+            hideConflictPopup();
 
             const eqData = JSON.parse(decodeURIComponent(quakeEl.dataset.quakeInfo));
             const popup = document.getElementById('quakePopup');
@@ -6100,6 +6714,8 @@
             hideChokepointPopup();
             hideQuakePopup();
             hideCustomHotspotPopup();
+            hideUSCityPopup();
+            hideConflictPopup();
 
             const czData = JSON.parse(decodeURIComponent(cyberEl.dataset.cyberInfo));
             const popup = document.getElementById('cyberPopup');
@@ -6180,6 +6796,8 @@
             hideChokepointPopup();
             hideQuakePopup();
             hideCyberPopup();
+            hideUSCityPopup();
+            hideConflictPopup();
 
             const monitorData = JSON.parse(decodeURIComponent(hotspotEl.dataset.monitorInfo));
             const popup = document.getElementById('customHotspotPopup');
