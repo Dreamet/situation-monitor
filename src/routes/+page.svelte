@@ -407,12 +407,9 @@
 		overflow-y: auto;
 	}
 
-	.panel-slot {
-		min-height: 200px;
-	}
-
 	.map-slot {
-		grid-column: 1 / -1;
+		column-span: all;
+		margin-bottom: 0.5rem;
 	}
 
 	@media (max-width: 768px) {
