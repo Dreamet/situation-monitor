@@ -7,7 +7,8 @@ import {
     fetchCategory, fetchMarkets, fetchSectors, fetchCommodities,
     fetchEarthquakes, fetchWhaleTransactions,
     fetchGovContracts, fetchAINews, fetchFedBalance, fetchPolymarket,
-    fetchLayoffs, fetchSituationNews, fetchIntelFeed, fetchGDELTNews
+    fetchLayoffs, fetchSituationNews, fetchIntelFeed, fetchGDELTNews,
+    fetchWorldLeaders
 } from './data.js';
 import { renderGlobalMap } from './map.js';
 import {
@@ -18,7 +19,8 @@ import {
     renderNews, renderMarkets, renderHeatmap, renderCommodities,
     renderPolymarket, renderWhaleWatch,
     renderMainCharacter, renderGovContracts, renderAINews,
-    renderMoneyPrinter, renderIntelFeed, renderLayoffs, renderSituation
+    renderMoneyPrinter, renderIntelFeed, renderLayoffs, renderSituation,
+    renderWorldLeaders
 } from './renderers.js';
 import {
     analyzeCorrelations, renderCorrelationEngine,
@@ -191,7 +193,7 @@ async function refreshAll() {
     setStatus('Loading extras...', true);
 
     // STAGE 3: Extra data - lowest priority
-    let whales = [], contracts = [], aiNews = [], layoffs = [], venezuelaNews = [], greenlandNews = [], iranNews = [], intelFeed = [];
+    let whales = [], contracts = [], aiNews = [], layoffs = [], venezuelaNews = [], greenlandNews = [], iranNews = [], intelFeed = [], leadersData = [];
     try {
         const stage3Promise = Promise.allSettled([
             isPanelEnabled('whales') ? fetchWhaleTransactions() : Promise.resolve([]),
@@ -201,7 +203,8 @@ async function refreshAll() {
             isPanelEnabled('venezuela') ? fetchSituationNews('venezuela maduro caracas crisis') : Promise.resolve([]),
             isPanelEnabled('greenland') ? fetchSituationNews('greenland denmark trump arctic') : Promise.resolve([]),
             isPanelEnabled('iran') ? fetchSituationNews('iran (protest OR uprising OR revolution OR nuclear OR irgc OR sanctions)') : Promise.resolve([]),
-            isPanelEnabled('intel') ? fetchIntelFeed() : Promise.resolve([])
+            isPanelEnabled('intel') ? fetchIntelFeed() : Promise.resolve([]),
+            isPanelEnabled('leaders') ? fetchWorldLeaders() : Promise.resolve([])
         ]);
 
         const results = await stage3Promise;
@@ -213,6 +216,7 @@ async function refreshAll() {
         greenlandNews = results[5].status === 'fulfilled' ? results[5].value : [];
         iranNews = results[6].status === 'fulfilled' ? results[6].value : [];
         intelFeed = results[7].status === 'fulfilled' ? results[7].value : [];
+        leadersData = results[8].status === 'fulfilled' ? results[8].value : [];
     } catch (e) {
         console.error('Stage 3 error:', e);
     }
@@ -243,6 +247,7 @@ async function refreshAll() {
             criticalKeywords: ['protest', 'uprising', 'revolution', 'crackdown', 'killed', 'shot', 'nuclear', 'strike', 'attack', 'irgc', 'khamenei']
         });
     }
+    if (isPanelEnabled('leaders')) renderWorldLeaders(leadersData);
 
     // Render My Monitors panel with all news
     if (isPanelEnabled('monitors')) {

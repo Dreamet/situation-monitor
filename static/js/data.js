@@ -1,6 +1,6 @@
 // data.js - All data fetching functions with service layer integration
 
-import { CORS_PROXIES, ALERT_KEYWORDS, SECTORS, COMMODITIES, INTEL_SOURCES, AI_FEEDS } from './constants.js';
+import { CORS_PROXIES, ALERT_KEYWORDS, SECTORS, COMMODITIES, INTEL_SOURCES, AI_FEEDS, WORLD_LEADERS } from './constants.js';
 import { serviceClient } from './services/index.js';
 
 // Fetch with proxy fallback - now uses ServiceClient
@@ -601,4 +601,48 @@ export async function fetchIntelFeed() {
 // Export serviceClient health status for debugging
 export function getServiceHealth() {
     return serviceClient.getHealthStatus();
+}
+
+// Fetch world leaders news - queries GDELT for each leader
+export async function fetchWorldLeaders() {
+    const fetchLeaderNews = async (leader) => {
+        // Build query from leader's keywords
+        const query = leader.keywords.map(k => `"${k}"`).join(' OR ');
+
+        try {
+            const result = await serviceClient.request('GDELT', '/api/v2/doc/doc', {
+                params: {
+                    query: query,
+                    mode: 'artlist',
+                    maxrecords: 5,
+                    format: 'json',
+                    sort: 'date'
+                }
+            });
+
+            const news = (result.data.articles || []).map(article => ({
+                source: article.domain || 'Unknown',
+                title: article.title || '',
+                link: article.url || '',
+                pubDate: article.seendate || ''
+            }));
+
+            return { ...leader, news };
+        } catch (error) {
+            return { ...leader, news: [] };
+        }
+    };
+
+    // Fetch news for all leaders in parallel (with some batching to avoid rate limits)
+    const batchSize = 5;
+    const results = [];
+
+    for (let i = 0; i < WORLD_LEADERS.length; i += batchSize) {
+        const batch = WORLD_LEADERS.slice(i, i + batchSize);
+        const batchResults = await Promise.allSettled(batch.map(fetchLeaderNews));
+        results.push(...batchResults.map(r => r.status === 'fulfilled' ? r.value : null).filter(Boolean));
+    }
+
+    // Sort by news activity (leaders with more news first)
+    return results.sort((a, b) => (b.news?.length || 0) - (a.news?.length || 0));
 }

@@ -456,3 +456,52 @@ export function renderSituation(panelId, statusId, news, config) {
         ${newsHTML}
     `;
 }
+
+// Render World Leaders panel
+export function renderWorldLeaders(leadersData) {
+    const panel = document.getElementById('leadersPanel');
+    const count = document.getElementById('leadersCount');
+
+    if (!leadersData || leadersData.length === 0) {
+        panel.innerHTML = '<div class="loading-msg">Loading leaders data...</div>';
+        count.textContent = '-';
+        return;
+    }
+
+    count.textContent = leadersData.length;
+
+    panel.innerHTML = `<div class="leaders-grid">${leadersData.map(leader => {
+        const newsCount = leader.news?.length || 0;
+        const activityClass = newsCount >= 3 ? 'high-activity' : newsCount >= 1 ? 'active' : '';
+        const latestNews = leader.news?.slice(0, 2) || [];
+        const focusTopics = leader.focus?.slice(0, 3).map(f => `<span class="leader-focus">${f}</span>`).join('') || '';
+
+        return `
+            <div class="leader-card ${activityClass}">
+                <div class="leader-header">
+                    <span class="leader-flag">${leader.flag}</span>
+                    <div class="leader-info">
+                        <div class="leader-name">${leader.name}</div>
+                        <div class="leader-title">${leader.title}</div>
+                        <div class="leader-country">${leader.country}</div>
+                    </div>
+                    ${newsCount > 0 ? `<div class="leader-activity-badge">${newsCount}</div>` : ''}
+                </div>
+                <div class="leader-meta">
+                    <span class="leader-since">Since ${leader.since}</span>
+                    <span class="leader-party">${leader.party}</span>
+                </div>
+                ${focusTopics ? `<div class="leader-focus-topics">${focusTopics}</div>` : ''}
+                ${latestNews.length > 0 ? `
+                    <div class="leader-news">
+                        ${latestNews.map(n => `
+                            <a href="${n.link}" target="_blank" class="leader-news-item" title="${n.title}">
+                                ${n.title.length > 60 ? n.title.substring(0, 60) + '...' : n.title}
+                            </a>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('')}</div>`;
+}
